@@ -1,0 +1,41 @@
+'Example1.RSE – file will be as follows:
+#SAMPLING SUBSAMPLE2	'SUBSAMPLE2 Key word will be used for this scheme
+#GROUP 2			'Number of Group variables used
+SEC   C sec 	'Sector Rural-1, Urban-2
+ST_GR C NEWVAR 	'Groups of States
+
+#FILTER 1		'Number of conditions used to generate the Work-file
+AGE>=15
+
+#VARIABLE 3  	'Number of Variables selected
+POP	N  NEWVAR	'Variable for Population
+LF	N  NEWVAR	'Variable for Labour Force
+WRK	N  NEWVAR	'Variable for Workers
+
+#FILE Data1.Xlsx	'We may make it optional, directly select the file in the app
+
+#RENAME  5    			'Number of variables to be renamed
+STRMID C sec+st+strm+sstrm    'Combination of fields to get unique Stratum ID
+SS     C ss				'Sub Sample Code
+NSS    N  nss			'No. of FSU surveyed in STRM_ID X SS
+NSC    N  nsc			'No. of FSU surveyed in STRM_ID
+MULT   N  mult			'Sub-sample Multiplier X 100
+
+#TRANSFORM 4  	' Number of Variable transformed
+ST_GR="G1"   in(ST,"10,19,20,21")			'For East Zone
+ST_GR="G2"   in(ST,"11,12,13,14,15,16,17,18")	'For North-East Zone
+ST_GR="G3"   Otherwise					'Rest of the States
+POP=1									'For All persons
+WRK=1  in(CWS,"11,12,21,31,41,51,61,61,71,72")		'For persons Employed
+WRK=0  NOT in(CWS,"11,12,21,31,41,51,61,61,71,72")    'For rest
+LF=1      in(CWS,"11,12,21,31,41,51,61,61,71,72,81")	'For persons in Labour Force 
+LF=0      Otherwise						'For rest
+
+#EST_RSE 7		'Number of columns to be generated
+S POP			'S stands for Sample count
+E POP			'E stands for Estimated value
+R POP			'R stands for RSE
+E 100*LF/POP	'Ration of LF/POP presented by multiplying 100
+R LF/POP
+E 100*WRK/POP
+R WRK/POP
